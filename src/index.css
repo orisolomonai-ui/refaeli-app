@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-black: #0a0a0a;
+  --color-brand-charcoal: #1c1c1c;
+  --color-brand-gold: #c9a961;
+  --color-brand-gold-dark: #a9873f;
+  --color-brand-gold-light: #e8dcc0;
+  --color-brand-canvas: #f5f4f2;
+}
+
+html {
+  font-family: "Heebo", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-brand-canvas);
+}
