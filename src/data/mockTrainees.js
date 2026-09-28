@@ -1,6 +1,11 @@
 // נתוני דמה (Mock) - מאחדים רישום/תשלומים, מעקב אימונים ומעקב תזונה/התקדמות
+//
+// rawTrainees הוא נתוני הזרע כפי שנכתבו ב-2026-08-20. הייצוא בתחתית הקובץ
+// (mockTrainees) עובר נרמול: לוגים עקביים, שדות חדשים, ותאריכים שמוזזים ליום הנוכחי.
 
-export const mockTrainees = [
+import { todayISO, shiftISO, daysBetween } from "../lib/traineeSelectors";
+
+const rawTrainees = [
   {
     id: 1,
     name: "יובל כהן",
@@ -534,6 +539,74 @@ export const mockTrainees = [
     },
   },
 ];
+
+// --- נרמול ---
+
+const SEED_DATE = "2026-08-20";
+const MAX_LOGGED_SESSIONS = 12;
+const SESSION_CADENCE_DAYS = 3;
+
+// שדות שנוספו לאזור המתאמן: יעד משקל ודירוג בשבוע שעבר (הדירוג הנוכחי מחושב מ-points)
+const EXTRAS_BY_ID = {
+  1: { goalWeight: 80, lastWeekRank: 10 },
+  2: { goalWeight: 58, lastWeekRank: 12 },
+  3: { goalWeight: 82, lastWeekRank: 3 },
+  4: { goalWeight: 65, lastWeekRank: 14 },
+  5: { goalWeight: 75, lastWeekRank: 7 },
+  6: { goalWeight: 55, lastWeekRank: 6 },
+  7: { goalWeight: 90, lastWeekRank: 13 },
+  8: { goalWeight: 58, lastWeekRank: 1 },
+  9: { goalWeight: 76, lastWeekRank: 15 },
+  10: { goalWeight: 67, lastWeekRank: 5 },
+  11: { goalWeight: 82, lastWeekRank: 8 },
+  12: { goalWeight: 52, lastWeekRank: 11 },
+  13: { goalWeight: 92, lastWeekRank: 4 },
+  14: { goalWeight: 58, lastWeekRank: 9 },
+  15: { goalWeight: 75, lastWeekRank: 2 },
+};
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+// מזיז כל מחרוזת תאריך (בכל עומק) בפרש ימים קבוע; שאר הערכים (כולל כתובות תמונה) לא משתנים
+function shiftDates(value, days) {
+  if (typeof value === "string") {
+    return ISO_DATE.test(value) ? shiftISO(value, days) : value;
+  }
+  if (Array.isArray(value)) return value.map((v) => shiftDates(v, days));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([k, v]) => [k, shiftDates(v, days)])
+    );
+  }
+  return value;
+}
+
+// לוג האימונים תואם למונים: min(נוצלו, 12) רשומות, מהאחרונה אחורה במרווחים קבועים
+function buildSessionHistory(t) {
+  const used = t.totalSessions - t.sessionsRemaining;
+  const count = Math.max(1, Math.min(used, MAX_LOGGED_SESSIONS));
+  return Array.from({ length: count }, (_, i) => ({
+    date: shiftISO(t.lastSessionDate, -(count - 1 - i) * SESSION_CADENCE_DAYS),
+  }));
+}
+
+function normalizeTrainees(raw) {
+  const delta = daysBetween(SEED_DATE, todayISO());
+  return raw.map((t) => {
+    const sessionHistory = buildSessionHistory(t);
+    const merged = {
+      ...t,
+      ...EXTRAS_BY_ID[t.id],
+      sessionHistory,
+      // התאריכים האחרונים נגזרים מהלוגים, כך שאי אפשר שיסטו מהם
+      lastSessionDate: sessionHistory[sessionHistory.length - 1].date,
+      lastPaymentDate: t.paymentHistory[t.paymentHistory.length - 1].date,
+    };
+    return shiftDates(merged, delta);
+  });
+}
+
+export const mockTrainees = normalizeTrainees(rawTrainees);
 
 export function getTraineeById(id) {
   return mockTrainees.find((t) => String(t.id) === String(id));

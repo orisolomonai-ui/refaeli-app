@@ -1,11 +1,13 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { mockTrainees } from "../data/mockTrainees";
+import { todayISO } from "../lib/traineeSelectors";
 
 const TraineesContext = createContext(null);
 
-function today() {
-  return new Date().toISOString().slice(0, 10);
-}
+// הדמו של אזור המתאמן רץ תמיד כיובל כהן. כשיהיה לוגין אמיתי, זה המקום להחליף.
+export const DEMO_TRAINEE_ID = 1;
+
+const today = todayISO;
 
 export function TraineesProvider({ children }) {
   const [trainees, setTrainees] = useState(mockTrainees);
@@ -67,4 +69,9 @@ export function useTrainees() {
     throw new Error("useTrainees must be used within a TraineesProvider");
   }
   return ctx;
+}
+
+export function useCurrentTrainee() {
+  const { getTraineeById } = useTrainees();
+  return getTraineeById(DEMO_TRAINEE_ID);
 }

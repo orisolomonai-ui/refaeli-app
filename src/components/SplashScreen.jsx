@@ -1,9 +1,9 @@
 import { motion } from "framer-motion";
 
-export default function SplashScreen({ onEnter }) {
+export default function SplashScreen({ onEnterTrainee, onEnterAdmin }) {
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-brand-black px-6"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-brand-black px-6"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -25,16 +25,27 @@ export default function SplashScreen({ onEnter }) {
         </div>
       </motion.div>
 
-      <motion.button
-        onClick={onEnter}
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.25, ease: "easeOut" }}
-        whileTap={{ scale: 0.96 }}
-        className="rounded-full bg-brand-gold px-8 py-3 text-sm font-bold text-brand-black shadow-lg"
+        className="flex w-full max-w-xs flex-col items-center gap-3"
       >
-        כניסה
-      </motion.button>
+        <motion.button
+          onClick={onEnterTrainee}
+          whileTap={{ scale: 0.97 }}
+          className="w-full rounded-full bg-brand-gold py-3.5 text-base font-bold text-brand-black shadow-lg"
+        >
+          כניסת מתאמן
+        </motion.button>
+        <motion.button
+          onClick={onEnterAdmin}
+          whileTap={{ scale: 0.97 }}
+          className="rounded-full border border-white/20 px-6 py-2 text-xs font-medium text-zinc-300 hover:border-white/40"
+        >
+          כניסת מנהל
+        </motion.button>
+      </motion.div>
     </motion.div>
   );
 }
