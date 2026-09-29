@@ -7,6 +7,9 @@
   --color-brand-gold-dark: #a9873f;
   --color-brand-gold-light: #e8dcc0;
   --color-brand-canvas: #f5f4f2;
+  /* אזור המתאמן: משטח בהיר וחם, קרוב לחוויית Active, בזהות שחור/זהב */
+  --color-brand-mist: #faf8f4;
+  --color-brand-line: #ece6d8;
 }
 
 html {
@@ -16,4 +19,13 @@ html {
 body {
   margin: 0;
   background-color: var(--color-brand-canvas);
+}
+
+/* רקע כתמי גרדיאנט עדינים למסכי אזור המתאמן, בהשראת Active */
+.trainee-bg {
+  background-color: var(--color-brand-mist);
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(201, 169, 97, 0.14), transparent 42%),
+    radial-gradient(circle at 100% 18%, rgba(201, 169, 97, 0.1), transparent 38%);
+  background-repeat: no-repeat;
 }

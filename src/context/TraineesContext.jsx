@@ -43,6 +43,31 @@ export function TraineesProvider({ children }) {
       }));
     }
 
+    // כניסה עצמית של מתאמן ("צ'ק-אין לאימון") - כמו addSession, ובנוסף מזכה
+    // ב-10 נק' Refaeli Cash (לפי EARNING_RULES), כדי שהדגמת הצבירה תהיה חיה.
+    function checkIn(id) {
+      const date = today();
+      updateTraineeState(id, (t) => ({
+        ...t,
+        sessionsRemaining: Math.max(0, t.sessionsRemaining - 1),
+        lastSessionDate: date,
+        sessionHistory: [...t.sessionHistory, { date }],
+        points: t.points + 10,
+      }));
+    }
+
+    // מימוש פרס מהחנות: מוריד נקודות ושומר ב"הפרסים שלי" - בזיכרון בלבד, מתאפס ברענון
+    function redeem(id, reward) {
+      updateTraineeState(id, (t) => ({
+        ...t,
+        points: t.points - reward.cost,
+        purchasedRewards: [
+          ...(t.purchasedRewards ?? []),
+          { id: reward.id, name: reward.name, cost: reward.cost, date: today() },
+        ],
+      }));
+    }
+
     function updateTrainee(id, updates) {
       updateTraineeState(id, (t) => ({ ...t, ...updates }));
     }
@@ -52,6 +77,8 @@ export function TraineesProvider({ children }) {
       getTraineeById,
       markAsPaid,
       addSession,
+      checkIn,
+      redeem,
       updateTrainee,
     };
   }, [trainees]);

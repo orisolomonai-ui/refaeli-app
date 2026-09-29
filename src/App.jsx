@@ -13,10 +13,10 @@ import TraineeDetail from "./pages/TraineeDetail";
 import SplashScreen from "./components/SplashScreen";
 import TraineeLayout from "./components/trainee-area/TraineeLayout";
 import TraineeHome from "./pages/trainee/TraineeHome";
-import TraineeProgress from "./pages/trainee/TraineeProgress";
-import TraineeCash from "./pages/trainee/TraineeCash";
-import TraineeCommunity from "./pages/trainee/TraineeCommunity";
-import TraineeStore from "./pages/trainee/TraineeStore";
+import TraineeRewards from "./pages/trainee/TraineeRewards";
+import TraineePerformance from "./pages/trainee/TraineePerformance";
+import TraineeGroups from "./pages/trainee/TraineeGroups";
+import TraineeMore from "./pages/trainee/TraineeMore";
 import { TraineesProvider } from "./context/TraineesContext";
 
 const SPLASH_SEEN_KEY = "refaeli_entered";
@@ -31,10 +31,10 @@ function AnimatedRoutes() {
         <Route path="/trainee/:id" element={<TraineeDetail />} />
         {/* אזור המתאמן */}
         <Route path="/me" element={<TraineeHome />} />
-        <Route path="/me/progress" element={<TraineeProgress />} />
-        <Route path="/me/cash" element={<TraineeCash />} />
-        <Route path="/me/community" element={<TraineeCommunity />} />
-        <Route path="/me/store" element={<TraineeStore />} />
+        <Route path="/me/rewards" element={<TraineeRewards />} />
+        <Route path="/me/performance" element={<TraineePerformance />} />
+        <Route path="/me/groups" element={<TraineeGroups />} />
+        <Route path="/me/more" element={<TraineeMore />} />
       </Routes>
     </AnimatePresence>
   );

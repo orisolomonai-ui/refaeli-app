@@ -1,8 +1,10 @@
 // מקור אמת אחד לערכים נגזרים על מתאמן (משקל, דירוג, אימונים החודש, פרס הבא...).
 // כל מסך קורא מכאן, כדי שאותו מספר לא ייגזר בכמה דרכים.
-import { REWARDS } from "../data/rewards";
+import { STORE_CATALOG } from "../data/rewards";
 
 export const CHALLENGE_TARGET = 12;
+export const WEEKLY_GOAL = 3;
+const WEEKDAY_LABELS = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 
 const DAY_MS = 86400000;
 const pad = (n) => String(n).padStart(2, "0");
@@ -73,6 +75,51 @@ export function sessionsThisMonth(t, todayIso = todayISO()) {
   return t.sessionHistory.filter((s) => s.date.startsWith(monthPrefix)).length;
 }
 
+// תחילת השבוע (יום ראשון) שמכיל את התאריך הנתון
+function startOfWeekISO(iso) {
+  const dow = new Date(toUTC(iso)).getUTCDay(); // 0=ראשון
+  return shiftISO(iso, -dow);
+}
+
+function sessionsInWeek(t, weekStartIso) {
+  const weekEndIso = shiftISO(weekStartIso, 6);
+  return t.sessionHistory.filter(
+    (s) => s.date >= weekStartIso && s.date <= weekEndIso
+  );
+}
+
+export function sessionsThisWeek(t, todayIso = todayISO()) {
+  return sessionsInWeek(t, startOfWeekISO(todayIso)).length;
+}
+
+// מצב 7 ימי השבוע הנוכחי (א'-ש') לפי לוג האימונים בפועל, לתצוגת "השבוע שלי"
+export function weekDayStatus(t, todayIso = todayISO()) {
+  const weekStart = startOfWeekISO(todayIso);
+  const done = new Set(sessionsInWeek(t, weekStart).map((s) => s.date));
+  return WEEKDAY_LABELS.map((label, i) => {
+    const date = shiftISO(weekStart, i);
+    return { label, date, done: done.has(date), isToday: date === todayIso };
+  });
+}
+
+// כמה שבועות רצופים (כולל הנוכחי) שבהם הייתה לפחות פעילות אחת
+export function streakWeeks(t, todayIso = todayISO()) {
+  let weekStart = startOfWeekISO(todayIso);
+  let streak = 0;
+  for (let i = 0; i < 52; i++) {
+    if (sessionsInWeek(t, weekStart).length === 0) {
+      if (i === 0) {
+        weekStart = shiftISO(weekStart, -7);
+        continue; // השבוע הנוכחי עדיין לא הסתיים - לא שובר רצף אם ריק עד כה
+      }
+      break;
+    }
+    streak++;
+    weekStart = shiftISO(weekStart, -7);
+  }
+  return streak;
+}
+
 // --- דירוג ופרסים ---
 
 export function rankedByPoints(trainees) {
@@ -90,6 +137,6 @@ export function rankChange(trainees, t) {
 
 // הפרס הזול ביותר שהמתאמן עוד לא הגיע אליו (null אם הגיע לכולם)
 export function nextReward(points) {
-  const byCost = [...REWARDS].sort((a, b) => a.cost - b.cost);
+  const byCost = [...STORE_CATALOG].sort((a, b) => a.cost - b.cost);
   return byCost.find((r) => r.cost > points) ?? null;
 }
