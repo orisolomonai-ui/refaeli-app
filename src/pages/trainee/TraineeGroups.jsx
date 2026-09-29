@@ -1,9 +1,11 @@
+import { motion } from "framer-motion";
 import { useCurrentTrainee, useTrainees } from "../../context/TraineesContext";
 import { TraineePage } from "../../components/trainee-area/TraineeLayout";
 import Avatar from "../../components/Avatar";
 import Icon3D from "../../components/trainee-area/Icon3D";
 import { Bar } from "../../components/trainee-area/Summaries";
 import { Leaderboard } from "../../components/cash/CashSections";
+import { staggerContainer, staggerItem } from "../../lib/motionVariants";
 import {
   CHALLENGE_TARGET,
   monthName,
@@ -18,7 +20,10 @@ const PODIUM_ICON = { 1: "crown", 2: "medal", 3: "medal" };
 function PodiumSpot({ place, entry }) {
   if (!entry) return <div className="flex-1" />;
   return (
-    <div className="flex flex-1 flex-col items-center gap-1.5">
+    <motion.div
+      variants={staggerItem}
+      className="flex flex-1 flex-col items-center gap-1.5"
+    >
       <Icon3D name={PODIUM_ICON[place]} size={place === 1 ? 30 : 24} />
       <Avatar name={entry.name} size="sm" />
       <p className="max-w-[72px] truncate text-xs font-semibold text-zinc-800">
@@ -27,10 +32,14 @@ function PodiumSpot({ place, entry }) {
       <p className="text-[11px] font-bold text-brand-gold-dark">
         {entry.points}
       </p>
-      <div
+      <motion.div
+        initial={{ scaleY: 0 }}
+        animate={{ scaleY: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut", delay: 0.15 }}
+        style={{ transformOrigin: "bottom" }}
         className={`w-full rounded-t-lg bg-gradient-to-b from-brand-gold-light to-brand-gold/40 ${PODIUM_HEIGHT[place]}`}
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -58,11 +67,16 @@ export default function TraineeGroups() {
         <p className="mt-2 text-xs text-zinc-500">אימונים החודש - כל הסטודיו יחד</p>
       </div>
 
-      <div className="mt-4 flex items-end gap-2 rounded-2xl bg-white p-4 pt-6 shadow-sm">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="mt-4 flex items-end gap-2 rounded-2xl bg-white p-4 pt-6 shadow-sm"
+      >
         {PODIUM_ORDER.map((place) => (
           <PodiumSpot key={place} place={place} entry={top3[place]} />
         ))}
-      </div>
+      </motion.div>
 
       <div className="mt-4">
         <Leaderboard

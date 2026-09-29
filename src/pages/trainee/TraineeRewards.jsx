@@ -5,17 +5,25 @@ import { useCurrentTrainee, useTrainees } from "../../context/TraineesContext";
 import { TraineePage } from "../../components/trainee-area/TraineeLayout";
 import CoinChip from "../../components/trainee-area/CoinChip";
 import RewardCard from "../../components/trainee-area/RewardCard";
+import BenefitsBanner from "../../components/trainee-area/BenefitsBanner";
 import Icon3D from "../../components/trainee-area/Icon3D";
 import Sheet from "../../components/trainee-area/Sheet";
 import EmptyState from "../../components/EmptyState";
 import { EarningRulesList } from "../../components/cash/CashSections";
 import { STORE_CATALOG, STORE_CATEGORIES } from "../../data/rewards";
+import { staggerContainer, staggerItem } from "../../lib/motionVariants";
 
 const SORTS = [
   { key: "default", label: "מומלץ" },
   { key: "cheap", label: "מחיר: מהזול ליקר" },
   { key: "expensive", label: "מחיר: מהיקר לזול" },
 ];
+
+// שלושה פרסים בולטים לבאנר - מתוך STORE_CATALOG הקיים, מגוון קטגוריות/עלויות
+const FEATURED_IDS = ["private-session", "tshirt", "discount-month"];
+const FEATURED_REWARDS = FEATURED_IDS.map((id) =>
+  STORE_CATALOG.find((r) => r.id === id)
+).filter(Boolean);
 
 export default function TraineeRewards() {
   const { redeem } = useTrainees();
@@ -56,6 +64,8 @@ export default function TraineeRewards() {
         <CoinChip points={trainee.points} to={null} />
       </div>
 
+      <BenefitsBanner items={FEATURED_REWARDS} onSelect={setSelected} />
+
       <div className="mb-3 flex items-center gap-2 rounded-xl border border-brand-line bg-white px-3 py-2.5">
         <Search size={16} className="text-zinc-400" />
         <input
@@ -71,7 +81,7 @@ export default function TraineeRewards() {
           <button
             key={c}
             onClick={() => setCategory(c)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition active:scale-[0.96] ${
               category === c
                 ? "border-brand-black bg-brand-black text-brand-gold"
                 : "border-brand-line bg-white text-zinc-500"
@@ -100,16 +110,23 @@ export default function TraineeRewards() {
       {items.length === 0 ? (
         <EmptyState icon="🔍" message="לא נמצאו הטבות תואמות" />
       ) : (
-        <div className="grid grid-cols-2 gap-3">
+        <motion.div
+          key={`${category}-${sort}-${search}`}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="show"
+          className="grid grid-cols-2 gap-3"
+        >
           {items.map((reward) => (
-            <RewardCard
-              key={reward.id}
-              reward={reward}
-              purchased={purchasedIds.has(reward.id)}
-              onClick={() => setSelected(reward)}
-            />
+            <motion.div key={reward.id} variants={staggerItem}>
+              <RewardCard
+                reward={reward}
+                purchased={purchasedIds.has(reward.id)}
+                onClick={() => setSelected(reward)}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
       <div className="mt-5">
@@ -139,7 +156,7 @@ export default function TraineeRewards() {
                 </p>
                 <button
                   onClick={closeSheet}
-                  className="mt-2 w-full rounded-xl bg-brand-black py-3 text-sm font-bold text-brand-gold"
+                  className="mt-2 w-full rounded-xl bg-brand-black py-3 text-sm font-bold text-brand-gold transition active:scale-[0.98]"
                 >
                   סגירה
                 </button>
@@ -171,7 +188,7 @@ export default function TraineeRewards() {
                 <button
                   onClick={handleRedeem}
                   disabled={trainee.points < selected.cost}
-                  className="mt-4 w-full rounded-xl bg-brand-black py-3.5 text-sm font-bold text-brand-gold disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
+                  className="mt-4 w-full rounded-xl bg-brand-black py-3.5 text-sm font-bold text-brand-gold transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400 disabled:active:scale-100"
                 >
                   {trainee.points < selected.cost
                     ? "אין מספיק נקודות"

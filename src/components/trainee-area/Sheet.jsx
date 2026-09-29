@@ -27,7 +27,7 @@ export default function Sheet({ onClose, title, children }) {
           <button
             onClick={onClose}
             aria-label="סגירה"
-            className="rounded-full p-1.5 text-zinc-400 hover:bg-zinc-100"
+            className="rounded-full p-1.5 text-zinc-400 transition active:scale-90 hover:bg-zinc-100"
           >
             <X size={18} />
           </button>

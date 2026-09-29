@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import { ChevronLeft, Dumbbell } from "lucide-react";
 import { useCurrentTrainee, useTrainees } from "../../context/TraineesContext";
 import { TraineePage } from "../../components/trainee-area/TraineeLayout";
-import CategoryCarousel from "../../components/trainee-area/CategoryCarousel";
+import IconCardCarousel from "../../components/trainee-area/IconCardCarousel";
 import Icon3D from "../../components/trainee-area/Icon3D";
+import CountUp from "../../components/trainee-area/CountUp";
+import HomeSkeleton from "../../components/trainee-area/Skeleton";
+import Coachmark from "../../components/trainee-area/Coachmark";
+import { flyPointsFrom } from "../../components/trainee-area/PointsFly";
 import { Bar } from "../../components/trainee-area/Summaries";
 import { EARNING_RULES } from "../../data/rewards";
 import { COACH_MESSAGE, MEAL_PLAN } from "../../data/traineeDemoContent";
@@ -38,7 +43,9 @@ function SessionsCategory({ trainee }) {
     <div>
       <div className="flex items-baseline justify-between">
         <p>
-          <span className="text-4xl font-bold text-zinc-900">{done}</span>
+          <span className="text-4xl font-bold text-zinc-900">
+            <CountUp value={done} />
+          </span>
           <span className="text-lg font-medium text-zinc-400">
             /{WEEKLY_GOAL}
           </span>
@@ -100,7 +107,9 @@ function WeightCategory({ trainee }) {
   return (
     <div>
       <p>
-        <span className="text-4xl font-bold text-zinc-900">{current}</span>{" "}
+        <span className="text-4xl font-bold text-zinc-900">
+          <CountUp value={current} />
+        </span>{" "}
         <span className="text-lg font-medium text-zinc-400">ק"ג</span>
       </p>
       <p className={`mt-1 text-sm font-semibold ${deltaColor}`}>
@@ -172,7 +181,7 @@ function NutritionCategory() {
           onClick={() =>
             setChecked((c) => ({ ...c, [meal.key]: !c[meal.key] }))
           }
-          className="flex w-full items-center justify-between rounded-xl bg-zinc-50 px-3 py-2.5 text-right"
+          className="flex w-full items-center justify-between rounded-xl bg-zinc-50 px-3 py-2.5 text-right transition active:scale-[0.98]"
         >
           <div>
             <p className="text-sm font-semibold text-zinc-800">
@@ -195,23 +204,61 @@ function NutritionCategory() {
   );
 }
 
-const CATEGORY_VIEWS = {
-  sessions: SessionsCategory,
-  weight: WeightCategory,
-  body: BodyCategory,
-  nutrition: NutritionCategory,
-};
-
 export default function TraineeHome() {
   const { trainees, checkIn } = useTrainees();
   const trainee = useCurrentTrainee();
   const [category, setCategory] = useState("sessions");
   const firstName = trainee.name.split(" ")[0];
-  const CategoryView = CATEGORY_VIEWS[category];
 
   const monthDone = sessionsThisMonth(trainee);
   const streak = streakWeeks(trainee);
   const rank = rankOf(trainees, trainee.id);
+
+  // שלד טעינה - פעם אחת בכניסה הראשונה ל-/me באותו session (הנתונים סינכרוניים,
+  // אין באמת המתנה חוזרת שרוצים להראות בכל ניווט)
+  const [showSkeleton, setShowSkeleton] = useState(
+    () => !sessionStorage.getItem("refaeli_home_seen")
+  );
+  useEffect(() => {
+    if (!showSkeleton) return;
+    const t = setTimeout(() => {
+      sessionStorage.setItem("refaeli_home_seen", "true");
+      setShowSkeleton(false);
+    }, 450);
+    return () => clearTimeout(t);
+  }, [showSkeleton]);
+
+  // חלון הסבר חד-פעמי (localStorage) שמצביע על קרוסלת הקטגוריות
+  const carouselWrapRef = useRef(null);
+  const [coachTarget, setCoachTarget] = useState(null);
+  useEffect(() => {
+    if (showSkeleton || localStorage.getItem("refaeli_coach_seen")) return;
+    const t = setTimeout(() => {
+      const rect = carouselWrapRef.current?.getBoundingClientRect();
+      if (rect) {
+        setCoachTarget({ left: rect.left, top: rect.top, width: rect.width, height: 78 });
+      }
+    }, 300);
+    return () => clearTimeout(t);
+  }, [showSkeleton]);
+
+  function dismissCoach() {
+    localStorage.setItem("refaeli_coach_seen", "true");
+    setCoachTarget(null);
+  }
+
+  function handleCheckIn(e) {
+    if (trainee.sessionsRemaining > 0) flyPointsFrom(e.currentTarget, 10);
+    checkIn(trainee.id);
+  }
+
+  if (showSkeleton) {
+    return (
+      <TraineePage>
+        <HomeSkeleton />
+      </TraineePage>
+    );
+  }
 
   return (
     <TraineePage>
@@ -253,17 +300,18 @@ export default function TraineeHome() {
         </div>
       </div>
 
-      {/* קרוסלת קטגוריות */}
-      <div className="mt-5">
-        <CategoryCarousel
+      {/* קרוסלת קטגוריות מסונכרנת: אייקונים + כרטיסים */}
+      <div ref={carouselWrapRef} className="mt-5">
+        <IconCardCarousel
           categories={CATEGORIES}
           active={category}
           onChange={setCategory}
-        />
-      </div>
-
-      <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">
-        <CategoryView trainee={trainee} />
+        >
+          <SessionsCategory trainee={trainee} />
+          <WeightCategory trainee={trainee} />
+          <BodyCategory trainee={trainee} />
+          <NutritionCategory />
+        </IconCardCarousel>
       </div>
 
       {/* הודעה מעמית */}
@@ -279,7 +327,7 @@ export default function TraineeHome() {
 
       {/* צ'ק-אין */}
       <button
-        onClick={() => checkIn(trainee.id)}
+        onClick={handleCheckIn}
         disabled={trainee.sessionsRemaining === 0}
         className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-gold py-3.5 text-sm font-bold text-brand-black shadow-md transition active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
       >
@@ -306,6 +354,16 @@ export default function TraineeHome() {
           <ChevronLeft size={14} /> לדירוג הקהילה
         </Link>
       </div>
+
+      <AnimatePresence>
+        {coachTarget && (
+          <Coachmark
+            targetRect={coachTarget}
+            text="כאן רואים את ההתקדמות שלך - החליקו בין הקטגוריות והרוויחו Refaeli Cash"
+            onDismiss={dismissCoach}
+          />
+        )}
+      </AnimatePresence>
     </TraineePage>
   );
 }

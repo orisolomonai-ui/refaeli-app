@@ -1,4 +1,7 @@
+import { motion } from "framer-motion";
 import { daysSince } from "../lib/utils";
+import CountUp from "./trainee-area/CountUp";
+import { staggerContainer, staggerItem } from "../lib/motionVariants";
 
 export default function SummaryBanner({ trainees }) {
   const unpaidCount = trainees.filter(
@@ -18,20 +21,26 @@ export default function SummaryBanner({ trainees }) {
   ];
 
   return (
-    <div className="mb-6 grid grid-cols-1 divide-y divide-brand-gold/20 overflow-hidden rounded-2xl bg-brand-black sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-x-reverse">
+    <motion.div
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className="mb-6 grid grid-cols-1 divide-y divide-brand-gold/20 overflow-hidden rounded-2xl bg-brand-black sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-x-reverse"
+    >
       {stats.map((s) => (
-        <div
+        <motion.div
           key={s.label}
+          variants={staggerItem}
           className="flex flex-col items-center gap-1 px-6 py-5 text-center"
         >
           <span className="text-3xl font-bold text-brand-gold">
-            {s.value}
+            <CountUp value={s.value} />
           </span>
           <span className="text-xs font-medium text-zinc-300">
             {s.label}
           </span>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

@@ -86,8 +86,16 @@ export default function Dashboard() {
         <EmptyState icon="🔍" message="לא נמצאו מתאמנים תואמים" />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredTrainees.map((trainee) => (
-            <TraineeCard key={trainee.id} trainee={trainee} />
+          {filteredTrainees.map((trainee, i) => (
+            <motion.div
+              key={trainee.id}
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "0px 0px -40px 0px" }}
+              transition={{ duration: 0.28, ease: "easeOut", delay: Math.min(i, 5) * 0.03 }}
+            >
+              <TraineeCard trainee={trainee} />
+            </motion.div>
           ))}
         </div>
       )}

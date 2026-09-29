@@ -15,6 +15,7 @@ import CategoryCarousel from "../../components/trainee-area/CategoryCarousel";
 import BeforeAfterSlider from "../../components/BeforeAfterSlider";
 import EmptyState from "../../components/EmptyState";
 import { currentWeight, weightDelta } from "../../lib/traineeSelectors";
+import CountUp from "../../components/trainee-area/CountUp";
 
 const GOLD = "#c9a961";
 const GRAPHITE = "#71717a";
@@ -71,7 +72,9 @@ function WeightChart({ trainee, range }) {
   return (
     <div>
       <p>
-        <span className="text-4xl font-bold text-zinc-900">{current}</span>{" "}
+        <span className="text-4xl font-bold text-zinc-900">
+          <CountUp value={current} />
+        </span>{" "}
         <span className="text-lg font-medium text-zinc-400">ק"ג</span>
       </p>
       <p className={`mt-1 text-sm font-semibold ${deltaColor}`}>
@@ -126,14 +129,14 @@ function BodyChart({ trainee, range }) {
         <div>
           <p className="text-xs font-medium text-zinc-500">אחוז שומן</p>
           <p className="text-2xl font-bold text-zinc-900">
-            {lastFat}
+            <CountUp value={lastFat} />
             <span className="text-sm font-medium text-zinc-400">%</span>
           </p>
         </div>
         <div>
           <p className="text-xs font-medium text-zinc-500">מסת שריר</p>
           <p className="text-2xl font-bold text-zinc-900">
-            {lastMuscle}
+            <CountUp value={lastMuscle} />
             <span className="text-sm font-medium text-zinc-400"> ק"ג</span>
           </p>
         </div>

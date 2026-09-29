@@ -1,9 +1,11 @@
 // קטעי ה-Refaeli Cash (יתרה, איך צוברים, חנות, ליגה) — משמשים גם בלשונית של המנהל
 // (tone="light", המראה המקורי) וגם באזור המתאמן (tone="dark").
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Avatar from "../Avatar";
 import { EARNING_RULES, REWARDS } from "../../data/rewards";
-import { rankedByPoints, rankOf } from "../../lib/traineeSelectors";
+import { rankChange, rankedByPoints, rankOf } from "../../lib/traineeSelectors";
+import { staggerContainer, staggerItem } from "../../lib/motionVariants";
 
 const THEME = {
   light: {
@@ -148,20 +150,38 @@ export function RewardsGrid({
   );
 }
 
-function LeaderboardRow({ rank, entry, isCurrent, tone }) {
+function LeaderboardRow({ rank, entry, isCurrent, tone, change }) {
   const t = THEME[tone];
+  const arrow = change > 0 ? "up" : change < 0 ? "down" : null;
   return (
-    <div
+    <motion.div
+      layout
+      variants={staggerItem}
+      transition={{ layout: { duration: 0.3, ease: "easeOut" } }}
       className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
         isCurrent ? t.rowCurrent : ""
       }`}
     >
-      <span
+      <motion.span
+        layout="position"
         className={`w-6 shrink-0 text-center text-sm font-bold ${t.rank}`}
         dir="ltr"
       >
         {rank}
-      </span>
+      </motion.span>
+      {/* חץ שינוי דירוג - מוצג רק כשיש שינוי; קפיצת opacity/scale קטנה כשהוא
+          מופיע/מתעדכן (ה-key כולל את rank כדי לרענן את האנימציה בשינוי דירוג) */}
+      <motion.span
+        key={`${entry.id}-${rank}-${arrow ?? "same"}`}
+        initial={{ opacity: 0, scale: 0.4 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className={`-me-1 w-3 shrink-0 text-xs font-bold ${
+          arrow === "up" ? "text-emerald-500" : arrow === "down" ? "text-red-500" : ""
+        }`}
+      >
+        {arrow === "up" ? "▲" : arrow === "down" ? "▼" : ""}
+      </motion.span>
       <Avatar name={entry.name} size="sm" />
       <span className={`flex-1 truncate text-sm font-semibold ${t.name}`}>
         {entry.name}
@@ -172,7 +192,7 @@ function LeaderboardRow({ rank, entry, isCurrent, tone }) {
       <span className={`text-sm font-bold ${t.accent}`} dir="ltr">
         {entry.points}
       </span>
-    </div>
+    </motion.div>
   );
 }
 
@@ -189,7 +209,12 @@ export function Leaderboard({
 
   return (
     <Panel title={title} tone={tone}>
-      <div className="space-y-1">
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="space-y-1"
+      >
         {top10.map((entry, i) => (
           <LeaderboardRow
             key={entry.id}
@@ -197,6 +222,7 @@ export function Leaderboard({
             entry={entry}
             isCurrent={entry.id === currentTrainee.id}
             tone={tone}
+            change={rankChange(trainees, entry)}
           />
         ))}
         {currentRank > 10 && (
@@ -207,10 +233,11 @@ export function Leaderboard({
               entry={currentTrainee}
               isCurrent
               tone={tone}
+              change={rankChange(trainees, currentTrainee)}
             />
           </>
         )}
-      </div>
+      </motion.div>
     </Panel>
   );
 }

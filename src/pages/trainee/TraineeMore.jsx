@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft } from "lucide-react";
 import { useCurrentTrainee } from "../../context/TraineesContext";
 import { TraineePage } from "../../components/trainee-area/TraineeLayout";
@@ -10,6 +10,7 @@ import Icon3D from "../../components/trainee-area/Icon3D";
 import Sheet from "../../components/trainee-area/Sheet";
 import EmptyState from "../../components/EmptyState";
 import HistoryTab from "../../components/trainee-detail/HistoryTab";
+import { staggerContainer, staggerItem } from "../../lib/motionVariants";
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString("he-IL");
@@ -26,7 +27,7 @@ function MoreRow({ icon3d, label, onClick, to }) {
     </>
   );
   const className =
-    "flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm";
+    "flex w-full items-center justify-between rounded-2xl bg-white p-4 shadow-sm transition active:scale-[0.98]";
   return to ? (
     <Link to={to} className={className}>
       {content}
@@ -74,7 +75,7 @@ function ReferralSheet({ onClose }) {
           הזמינו חבר/ה חדש/ה למועדון וקבלו <b>100 נק' Refaeli Cash</b> לאחר
           האימון הראשון שלהם
         </p>
-        <button className="mt-2 w-full rounded-xl bg-brand-black py-3 text-sm font-bold text-brand-gold">
+        <button className="mt-2 w-full rounded-xl bg-brand-black py-3 text-sm font-bold text-brand-gold transition active:scale-[0.98]">
           שליחת הזמנה (הדגמה)
         </button>
       </div>
@@ -121,33 +122,48 @@ export default function TraineeMore() {
         </div>
       </div>
 
-      <div className="space-y-2.5">
-        <MoreRow
-          icon3d="calendar"
-          label="ציר הפעילות שלי"
-          onClick={() => setSheet("activity")}
-        />
-        <MoreRow
-          icon3d="chart_increasing"
-          label="התקדמות ותמונות"
-          to="/me/performance"
-        />
-        <MoreRow
-          icon3d="gift"
-          label="ההטבות שרכשת"
-          onClick={() => setSheet("rewards")}
-        />
-        <MoreRow
-          icon3d="handshake"
-          label="חבר מביא חבר"
-          onClick={() => setSheet("referral")}
-        />
-        <MoreRow
-          icon3d="idcard"
-          label="המנוי שלי"
-          onClick={() => setSheet("membership")}
-        />
-      </div>
+      <motion.div
+        variants={staggerContainer}
+        initial="hidden"
+        animate="show"
+        className="space-y-2.5"
+      >
+        <motion.div variants={staggerItem}>
+          <MoreRow
+            icon3d="calendar"
+            label="ציר הפעילות שלי"
+            onClick={() => setSheet("activity")}
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <MoreRow
+            icon3d="chart_increasing"
+            label="התקדמות ותמונות"
+            to="/me/performance"
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <MoreRow
+            icon3d="gift"
+            label="ההטבות שרכשת"
+            onClick={() => setSheet("rewards")}
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <MoreRow
+            icon3d="handshake"
+            label="חבר מביא חבר"
+            onClick={() => setSheet("referral")}
+          />
+        </motion.div>
+        <motion.div variants={staggerItem}>
+          <MoreRow
+            icon3d="idcard"
+            label="המנוי שלי"
+            onClick={() => setSheet("membership")}
+          />
+        </motion.div>
+      </motion.div>
 
       <AnimatePresence>
         {sheet === "activity" && (

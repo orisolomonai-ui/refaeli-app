@@ -6,7 +6,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, MotionConfig } from "framer-motion";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import TraineeDetail from "./pages/TraineeDetail";
@@ -80,12 +80,14 @@ function SplashGate() {
 
 function App() {
   return (
-    <TraineesProvider>
-      <BrowserRouter>
-        <AppShell />
-        <SplashGate />
-      </BrowserRouter>
-    </TraineesProvider>
+    <MotionConfig reducedMotion="user">
+      <TraineesProvider>
+        <BrowserRouter>
+          <AppShell />
+          <SplashGate />
+        </BrowserRouter>
+      </TraineesProvider>
+    </MotionConfig>
   );
 }
 

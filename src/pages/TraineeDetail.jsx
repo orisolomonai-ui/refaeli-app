@@ -55,7 +55,12 @@ export default function TraineeDetail() {
         → חזרה לדשבורד
       </Link>
 
-      <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.22, ease: "easeOut" }}
+        className="mb-6 flex flex-col gap-4 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+      >
         <div className="flex items-center gap-3">
           <Avatar name={trainee.name} size="md" />
           <div>
@@ -90,7 +95,7 @@ export default function TraineeDetail() {
             ✎ ערוך
           </button>
         </div>
-      </div>
+      </motion.div>
 
       <div className="mb-4 flex gap-1 overflow-x-auto rounded-lg bg-zinc-100 p-1 sm:w-fit">
         {TABS.map((tab) => (

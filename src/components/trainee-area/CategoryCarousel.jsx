@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import Icon3D from "./Icon3D";
 import Ring from "./Ring";
 
@@ -8,9 +9,10 @@ export default function CategoryCarousel({ categories, active, onChange }) {
       {categories.map((cat) => {
         const isActive = cat.key === active;
         return (
-          <button
+          <motion.button
             key={cat.key}
             onClick={() => onChange(cat.key)}
+            whileTap={{ scale: 0.94 }}
             className="flex shrink-0 snap-center flex-col items-center gap-1.5"
           >
             {isActive ? (
@@ -31,7 +33,7 @@ export default function CategoryCarousel({ categories, active, onChange }) {
             >
               {cat.label}
             </span>
-          </button>
+          </motion.button>
         );
       })}
     </div>
